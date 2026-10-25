@@ -19,6 +19,7 @@ winget install --id Git.Git -e --accept-source-agreements --accept-package-agree
 Pokretanje:
 
 ```bash
+cd ([Environment]::GetFolderPath("MyDocuments"))
 git clone https://github.com/anastasija-lukic/studentcoin-alukic.git
 cd studentcoin-alukic
 cargo run --release
