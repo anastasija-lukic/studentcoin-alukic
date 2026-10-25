@@ -97,4 +97,4 @@ Demo:
 7. Na kraju Alice ima 30, a Bob 20.
 
 Library: ed25519-dalek, sha2, rand, serde, axum, tokio, hex.\
-Verzije se nalaze u Cargo.locku.
+Verzije se nalaze u Cargo.locku, dolaze sa crates.io, a proverava ih Cargo.
