@@ -1,5 +1,6 @@
 use serde::Serialize;
 
+use crate::account::{apply, Account, Accounts};
 use crate::block::Block;
 use crate::transaction::Transaction;
 
@@ -30,9 +31,8 @@ impl Blockchain {
         if !transaction.is_valid() {
             return Err("Invalid transaction signature".to_string());
         }
-        if self.mempool.iter().any(|t| t.signature == transaction.signature) {
-            return Err("Transaction is already in the mempool".to_string());
-        }
+        let mut accounts = self.pending_accounts();
+        apply(&mut accounts, &transaction)?;
         self.mempool.push(transaction);
         Ok(())
     }
@@ -47,7 +47,44 @@ impl Blockchain {
         self.last_block()
     }
 
+    pub fn confirmed_accounts(&self) -> Accounts {
+        let mut accounts = Accounts::new();
+        for block in &self.chain {
+            for transaction in &block.transactions {
+                let _ = apply(&mut accounts, transaction);
+            }
+        }
+        accounts
+    }
+
+    fn pending_accounts(&self) -> Accounts {
+        let mut accounts = self.confirmed_accounts();
+        for transaction in &self.mempool {
+            let _ = apply(&mut accounts, transaction);
+        }
+        accounts
+    }
+
+    pub fn account(&self, address: &str) -> Account {
+        self.confirmed_accounts()
+            .get(address)
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn balance(&self, address: &str) -> u64 {
+        self.account(address).balance
+    }
+
+    pub fn next_nonce(&self, address: &str) -> u64 {
+        self.pending_accounts()
+            .get(address)
+            .map(|a| a.nonce)
+            .unwrap_or(0)
+    }
+
     pub fn is_valid(&self) -> bool {
+        let mut accounts = Accounts::new();
         for i in 1..self.chain.len() {
             let current = &self.chain[i];
             let previous = &self.chain[i - 1];
@@ -63,6 +100,11 @@ impl Blockchain {
             }
             if !Self::has_valid_transactions(current) {
                 return false;
+            }
+            for transaction in &current.transactions {
+                if apply(&mut accounts, transaction).is_err() {
+                    return false;
+                }
             }
         }
         true
