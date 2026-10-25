@@ -17,7 +17,7 @@ cd studentcoin-alukic
 cargo run --release
 ```
 
-Nalazi se na adresi http://127.0.0.1:3000.
+Nalazi se na adresi http://127.0.0.1:3000.\
 Primeri su za Windows sisteme.
 
 Ceo lanac:
@@ -71,5 +71,5 @@ Demo:
 4. Novi blok se minuje i transakcija ide u njega.
 5. Na kraju Alice ima 30, a Bob 20.
 
-Library: ed25519-dalek, sha2, rand, serde, axum, tokio, hex.
+Library: ed25519-dalek, sha2, rand, serde, axum, tokio, hex.\
 Verzije se nalaze u Cargo.locku.
