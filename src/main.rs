@@ -1,33 +1,28 @@
+use std::sync::{Arc, Mutex};
+
+use studentcoin::api::{router, AppState};
 use studentcoin::blockchain::Blockchain;
-use studentcoin::transaction::Transaction;
 use studentcoin::wallet::Wallet;
 
-fn main() {
-    let alice = Wallet::new();
-    let bob = Wallet::new();
-    let mut blockchain = Blockchain::new();
-    println!("StudentCoin node");
+const ADDRESS: &str = "127.0.0.1:3000";
 
-    let block = blockchain.mine_block(&alice.address());
-    println!("Mined block {} nonce {} hash {}", block.index, block.nonce, block.hash);
+#[tokio::main]
+async fn main() {
+    let node_wallet = Wallet::new();
+    let state = AppState {
+        blockchain: Arc::new(Mutex::new(Blockchain::new())),
+        node_address: node_wallet.address(),
+    };
 
-    let nonce = blockchain.next_nonce(&alice.address());
-    let transaction = Transaction::new(&alice, &bob.address(), 10, nonce);
-    match blockchain.add_transaction(transaction) {
-        Ok(()) => println!("Transaction of 10 added to mempool"),
-        Err(e) => println!("Transaction rejected: {}", e),
-    }
+    let listener = tokio::net::TcpListener::bind(ADDRESS)
+        .await
+        .expect("cannot bind address");
 
-    let nonce = blockchain.next_nonce(&alice.address());
-    let transaction = Transaction::new(&alice, &bob.address(), 100, nonce);
-    match blockchain.add_transaction(transaction) {
-        Ok(()) => println!("Transaction of 100 added to mempool"),
-        Err(e) => println!("Transaction of 100 rejected: {}", e),
-    }
+    println!("StudentCoin node running on http://{ADDRESS}");
+    println!("Node miner address: {}", node_wallet.address());
+    println!("curl.exe http://{ADDRESS}/chain");
+    println!("curl.exe http://{ADDRESS}/mine");
+    println!("curl.exe http://{ADDRESS}/balance/{}", node_wallet.address());
 
-    let block = blockchain.mine_block(&bob.address());
-    println!("Mined block {} nonce {} hash {}", block.index, block.nonce, block.hash);
-    println!("Alice balance: {}", blockchain.balance(&alice.address()));
-    println!("Bob balance: {}", blockchain.balance(&bob.address()));
-    println!("Chain valid: {}", blockchain.is_valid());
+    axum::serve(listener, router(state)).await.expect("server error");
 }
