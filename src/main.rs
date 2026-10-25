@@ -8,7 +8,7 @@ fn main() {
     let mut blockchain = Blockchain::new();
     println!("StudentCoin node");
 
-    let transaction = Transaction::new(&alice, &bob.address(), 10);
+    let transaction = Transaction::new(&alice, &bob.address(), 10, 0);
     match blockchain.add_transaction(transaction) {
         Ok(()) => println!("Transaction added to mempool"),
         Err(e) => println!("Transaction rejected: {}", e),
