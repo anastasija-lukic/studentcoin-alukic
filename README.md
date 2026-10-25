@@ -27,12 +27,10 @@ cargo run --release -- wallet
 ```
 
 ```
-secret:     <tajni ključ>
+secret:     <secret key>
 public key: <public key>
 address:    <adresa>
 ```
-
-Secret se ne deli sa drugima.
 
 Ceo lanac:
 
