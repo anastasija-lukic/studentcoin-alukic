@@ -9,7 +9,44 @@ Predmet: Programiranje Blockchaina, Tehnički fakultet, SII, 2026/2027.
 - Nonce sprečava ponavljanje transakcija.
 - HTTP API je napravljen u Axumu.
 
-Pokretanje (Rust 2024):
+Preduslovi (PowerShell kao Administrator):\
+Svaka komanda se pokreće posebno.
+
+Git:
+
+```powershell
+winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
+```
+
+C++ Build Tools (traje oko 10 minuta):
+
+```powershell
+winget install --id Microsoft.VisualStudio.2022.BuildTools -e --accept-source-agreements --accept-package-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+```
+
+Rust i Cargo:
+
+```powershell
+curl.exe -sSfL -o "$env:TEMP\rustup-init.exe" https://win.rustup.rs/x86_64
+```
+
+```powershell
+& "$env:TEMP\rustup-init.exe" -y --default-toolchain stable
+```
+
+Osvežavanje PATH-a:
+
+```powershell
+$env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+```
+
+Provera:
+
+```powershell
+git --version; rustc --version; cargo --version; curl.exe --version
+```
+
+Pokretanje:
 
 ```bash
 git clone https://github.com/anastasija-lukic/studentcoin-alukic.git
