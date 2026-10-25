@@ -10,40 +10,10 @@ Predmet: Programiranje Blockchaina, Tehnički fakultet, SII, 2026/2027.
 - HTTP API je napravljen u Axumu.
 
 Preduslovi (PowerShell kao Administrator):\
-Svaka komanda se pokreće zasebno.
-
-Git:
+Instalira Git, C++ Build Tools, Rust i Cargo, pa ispisuje verzije.
 
 ```powershell
-winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
-```
-
-C++ Build Tools:
-
-```powershell
-winget install --id Microsoft.VisualStudio.2022.BuildTools -e --accept-source-agreements --accept-package-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
-```
-
-Rust i Cargo:
-
-```powershell
-curl.exe -sSfL -o "$env:TEMP\rustup-init.exe" https://win.rustup.rs/x86_64
-```
-
-```powershell
-& "$env:TEMP\rustup-init.exe" -y --default-toolchain stable
-```
-
-Reload PATH-a:
-
-```powershell
-$env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
-```
-
-Provera:
-
-```powershell
-git --version; rustc --version; cargo --version; curl.exe --version
+winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements; winget install --id Microsoft.VisualStudio.2022.BuildTools -e --accept-source-agreements --accept-package-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"; curl.exe -sSfL -o "$env:TEMP\rustup-init.exe" https://win.rustup.rs/x86_64; & "$env:TEMP\rustup-init.exe" -y --default-toolchain stable; $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User"); git --version; rustc --version; cargo --version; curl.exe --version
 ```
 
 Pokretanje:
