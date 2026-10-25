@@ -1,7 +1,13 @@
+use studentcoin::transaction::Transaction;
 use studentcoin::wallet::Wallet;
 
 fn main() {
-    let wallet = Wallet::new();
+    let alice = Wallet::new();
+    let bob = Wallet::new();
     println!("StudentCoin node");
-    println!("New wallet address: {}", wallet.address());
+    println!("Alice: {}", alice.address());
+    println!("Bob:   {}", bob.address());
+
+    let transaction = Transaction::new(&alice, &bob.address(), 10);
+    println!("Transaction valid: {}", transaction.is_valid());
 }
