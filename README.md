@@ -18,7 +18,7 @@ Git:
 winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
 ```
 
-C++ Build Tools (traje oko 10 minuta):
+C++ Build Tools:
 
 ```powershell
 winget install --id Microsoft.VisualStudio.2022.BuildTools -e --accept-source-agreements --accept-package-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
@@ -34,7 +34,7 @@ curl.exe -sSfL -o "$env:TEMP\rustup-init.exe" https://win.rustup.rs/x86_64
 & "$env:TEMP\rustup-init.exe" -y --default-toolchain stable
 ```
 
-Osvežavanje PATH-a:
+Reload PATH-a:
 
 ```powershell
 $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
