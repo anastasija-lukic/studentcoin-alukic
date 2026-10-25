@@ -1,6 +1,8 @@
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use rand::rngs::OsRng;
 
+use crate::hash::{sha256, to_hex};
+
 pub struct Wallet {
     signing_key: SigningKey,
 }
@@ -21,20 +23,34 @@ impl Wallet {
     }
 
     pub fn secret_hex(&self) -> String {
-        hex::encode(self.signing_key.to_bytes())
+        to_hex(&self.signing_key.to_bytes())
+    }
+
+    pub fn public_key_hex(&self) -> String {
+        to_hex(&self.signing_key.verifying_key().to_bytes())
     }
 
     pub fn address(&self) -> String {
-        hex::encode(self.signing_key.verifying_key().to_bytes())
+        address_from_public_key(&self.signing_key.verifying_key().to_bytes())
     }
 
-    pub fn sign(&self, message: &[u8]) -> String {
-        hex::encode(self.signing_key.sign(message).to_bytes())
+    pub fn sign(&self, hash: &[u8; 32]) -> String {
+        to_hex(&self.signing_key.sign(hash).to_bytes())
     }
 }
 
-pub fn verify_signature(address: &str, message: &[u8], signature: &str) -> bool {
-    let key_bytes: [u8; 32] = match hex::decode(address).ok().and_then(|b| b.try_into().ok()) {
+impl Default for Wallet {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+pub fn address_from_public_key(public_key: &[u8]) -> String {
+    to_hex(&sha256(public_key))
+}
+
+pub fn verify_signature(public_key: &str, hash: &[u8; 32], signature: &str) -> bool {
+    let key_bytes: [u8; 32] = match hex::decode(public_key).ok().and_then(|b| b.try_into().ok()) {
         Some(bytes) => bytes,
         None => return false,
     };
@@ -42,12 +58,11 @@ pub fn verify_signature(address: &str, message: &[u8], signature: &str) -> bool 
         Some(bytes) => bytes,
         None => return false,
     };
-    let public_key = match VerifyingKey::from_bytes(&key_bytes) {
+    let verifying_key = match VerifyingKey::from_bytes(&key_bytes) {
         Ok(key) => key,
         Err(_) => return false,
     };
-    public_key
-        .verify(message, &Signature::from_bytes(&sig_bytes))
+    verifying_key
+        .verify(hash, &Signature::from_bytes(&sig_bytes))
         .is_ok()
 }
-

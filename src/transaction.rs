@@ -1,48 +1,51 @@
 use serde::{Deserialize, Serialize};
-use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::wallet::{verify_signature, Wallet};
+use crate::hash::sha256;
+use crate::wallet::{address_from_public_key, verify_signature, Wallet};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Transaction {
     pub sender: String,
     pub receiver: String,
     pub amount: u64,
-    pub timestamp: u64,
+    pub nonce: u64,
+    pub public_key: String,
     pub signature: String,
 }
 
 impl Transaction {
-    pub fn new(wallet: &Wallet, receiver: &str, amount: u64) -> Self {
+    pub fn new(wallet: &Wallet, receiver: &str, amount: u64, nonce: u64) -> Self {
         let mut transaction = Transaction {
             sender: wallet.address(),
             receiver: receiver.to_string(),
             amount,
-            timestamp: current_timestamp(),
+            nonce,
+            public_key: wallet.public_key_hex(),
             signature: String::new(),
         };
-        transaction.signature = wallet.sign(transaction.payload().as_bytes());
+        transaction.signature = wallet.sign(&transaction.hash());
         transaction
     }
 
-    pub fn payload(&self) -> String {
-        format!(
-            "{}:{}:{}:{}",
-            self.sender, self.receiver, self.amount, self.timestamp
-        )
+    pub fn hash(&self) -> [u8; 32] {
+        let data = format!(
+            "{}:{}:{}:{}:{}",
+            self.sender, self.receiver, self.amount, self.nonce, self.public_key
+        );
+        sha256(data.as_bytes())
     }
 
     pub fn is_valid(&self) -> bool {
         if self.amount == 0 || self.sender == self.receiver {
             return false;
         }
-        verify_signature(&self.sender, self.payload().as_bytes(), &self.signature)
+        let public_key = match hex::decode(&self.public_key) {
+            Ok(bytes) => bytes,
+            Err(_) => return false,
+        };
+        if address_from_public_key(&public_key) != self.sender {
+            return false;
+        }
+        verify_signature(&self.public_key, &self.hash(), &self.signature)
     }
-}
-
-pub fn current_timestamp() -> u64 {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0)
 }
