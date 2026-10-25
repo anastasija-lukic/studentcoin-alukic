@@ -17,7 +17,7 @@ cd studentcoin-alukic
 cargo run --release
 ```
 
-Nalazi se na adresi http://127.0.0.1:3000.\
+Nalazi se na adresi <http://127.0.0.1:3000>.\
 Primeri su za Windows sisteme.
 
 Ceo lanac:
