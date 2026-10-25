@@ -10,7 +10,7 @@ Predmet: Programiranje Blockchaina, Tehnički fakultet, SII, 2026/2027.
 - HTTP API je napravljen u Axumu.
 
 Preduslovi (PowerShell kao Administrator):\
-Svaka komanda se pokreće posebno.
+Svaka komanda se pokreće zasebno.
 
 Git:
 
