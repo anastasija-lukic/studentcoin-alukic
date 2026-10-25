@@ -31,6 +31,7 @@ Primeri su za Windows sisteme.
 Novi novčanik (u drugom terminalu):
 
 ```bash
+cd "$([Environment]::GetFolderPath('MyDocuments'))\studentcoin-alukic"
 cargo run --release -- wallet
 ```
 
