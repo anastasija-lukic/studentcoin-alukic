@@ -4,6 +4,7 @@ debug/
 release/
 **/*.rs.bk
 /tests/
+/podaci/
 *.pdb
 *.exe
 *.db
