@@ -3,6 +3,7 @@
 debug/
 release/
 **/*.rs.bk
+/tests/
 *.pdb
 *.exe
 *.db
