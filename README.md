@@ -16,92 +16,76 @@ Instalira Git, C++ Build Tools, Rust i Cargo, pa ispisuje verzije.
 winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements; winget install --id Microsoft.VisualStudio.2022.BuildTools -e --accept-source-agreements --accept-package-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"; curl.exe -sSfL -o "$env:TEMP\rustup-init.exe" https://win.rustup.rs/x86_64; & "$env:TEMP\rustup-init.exe" -y --default-toolchain stable; $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User"); git --version; rustc --version; cargo --version; curl.exe --version
 ```
 
-Pokretanje:
+1. Server (Tab 1):
 
-```bash
+```powershell
 cd ([Environment]::GetFolderPath("MyDocuments"))
 git clone https://github.com/anastasija-lukic/studentcoin-alukic.git
 cd studentcoin-alukic
 cargo run --release
 ```
 
-Nalazi se na adresi <http://127.0.0.1:3000>.\
-Primeri su za Windows sisteme.
+2. Novčanici (Tab 2 Alice, Tab 3 Bob):
 
-Novi novčanik (u drugom terminalu):
-
-```bash
+```powershell
 cd "$([Environment]::GetFolderPath('MyDocuments'))\studentcoin-alukic"
 cargo run --release -- wallet
 ```
 
-```
-secret:     <secret key>
-public key: <public key>
-address:    <adresa>
-```
+3. Lanac:
 
-Ceo lanac:
-
-```bash
+```powershell
 curl.exe http://127.0.0.1:3000/chain
 ```
 
-Mining bloka:
+4. Alice minuje blok:
 
-```bash
-curl.exe "http://127.0.0.1:3000/mine?miner=<adresa>"
+```powershell
+curl.exe "http://127.0.0.1:3000/mine?miner=<ALICE_ADRESA>"
 ```
 
-Stanje adrese:
+5. Stanje Alice:
 
-```bash
-curl.exe http://127.0.0.1:3000/balance/<adresa>
+```powershell
+curl.exe http://127.0.0.1:3000/balance/<ALICE_ADRESA>
 ```
 
-```json
-{ "address": "...", "balance": 50, "next_nonce": 0 }
+6. Alice potpisuje transakciju (Tab 2):
+
+```powershell
+cargo run --release -- sign <ALICE_SECRET> <BOB_ADRESA> 20 0
 ```
 
-Potpisivanje transakcije:
+7. Slanje transakcije (Tab 2):
 
-```bash
-cargo run --release -- sign <secret> <adresa primaoca> <iznos> <nonce>
-```
-
-Pravi se fajl podaci/transakcija.json.\
-Nonce je next_nonce iz stanja adrese.
-
-Nova transakcija:
-
-```bash
+```powershell
 curl.exe -X POST http://127.0.0.1:3000/transactions/new -H "Content-Type: application/json" --data-binary "@podaci/transakcija.json"
 ```
 
-```json
-{
-  "sender": "<adresa>",
-  "receiver": "<adresa>",
-  "amount": 20,
-  "nonce": 0,
-  "public_key": "<public key>",
-  "signature": "<128 hex karaktera>"
-}
+8. Novi blok:
+
+```powershell
+curl.exe http://127.0.0.1:3000/mine
 ```
 
-- 201 za validnu transakciju.
-- 400 za loš signature, nedovoljno sredstava ili pogrešan nonce.
-- 422 ako nedostaju određena polja.
+9. Stanja:
 
-Demo:
+```powershell
+curl.exe http://127.0.0.1:3000/balance/<ALICE_ADRESA>
+curl.exe http://127.0.0.1:3000/balance/<BOB_ADRESA>
+```
 
-1. Alice i Bob prave novčanike.
-2. Alice minuje blok i dobija 50.
-3. Alice potpisuje transakciju od 20 za Boba sa nonce 0.
-4. Alice šalje 20 Bobu i dobija 201.
-5. Ista transakcija poslata ponovo vraća 400 Wrong nonce.
-6. Novi blok se minuje i transakcija ide u njega.
-7. Na kraju Alice ima 30, a Bob 20.
+10. Lanac:
+
+```powershell
+curl.exe http://127.0.0.1:3000/chain
+```
+
+11. Ponovno slanje iste transakcije, očekuje se Wrong nonce (Tab 2):
+
+```powershell
+curl.exe -X POST http://127.0.0.1:3000/transactions/new -H "Content-Type: application/json" --data-binary "@podaci/transakcija.json"
+```
 
 Library: ed25519-dalek, sha2, rand, serde, axum, tokio, hex.\
 Verzije se nalaze u Cargo.locku, dolaze sa crates.io, a proverava ih Cargo.
