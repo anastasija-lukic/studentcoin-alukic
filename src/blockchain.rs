@@ -3,6 +3,8 @@ use serde::Serialize;
 use crate::block::Block;
 use crate::transaction::Transaction;
 
+pub const MINING_REWARD: u64 = 50;
+
 #[derive(Debug, Serialize)]
 pub struct Blockchain {
     pub chain: Vec<Block>,
@@ -22,6 +24,9 @@ impl Blockchain {
     }
 
     pub fn add_transaction(&mut self, transaction: Transaction) -> Result<(), String> {
+        if transaction.is_coinbase() {
+            return Err("Coinbase transactions cannot be sent to the mempool".to_string());
+        }
         if !transaction.is_valid() {
             return Err("Invalid transaction signature".to_string());
         }
@@ -32,10 +37,11 @@ impl Blockchain {
         Ok(())
     }
 
-    pub fn create_block(&mut self) -> &Block {
+    pub fn mine_block(&mut self, miner: &str) -> &Block {
         let index = self.last_block().index + 1;
         let previous_hash = self.last_block().hash.clone();
-        let transactions = std::mem::take(&mut self.mempool);
+        let mut transactions = vec![Transaction::coinbase(miner, MINING_REWARD, index)];
+        transactions.append(&mut self.mempool);
         let block = Block::new(index, transactions, previous_hash);
         self.chain.push(block);
         self.last_block()
@@ -52,14 +58,24 @@ impl Blockchain {
             if current.previous_hash != previous.hash {
                 return false;
             }
-            if current.hash != current.calculate_hash() {
+            if current.hash != current.calculate_hash() || !current.has_valid_proof() {
                 return false;
             }
-            if current.transactions.iter().any(|t| !t.is_valid()) {
+            if !Self::has_valid_transactions(current) {
                 return false;
             }
         }
         true
+    }
+
+    fn has_valid_transactions(block: &Block) -> bool {
+        let Some((coinbase, rest)) = block.transactions.split_first() else {
+            return false;
+        };
+        if !coinbase.is_coinbase() || coinbase.amount != MINING_REWARD {
+            return false;
+        }
+        rest.iter().all(|t| !t.is_coinbase() && t.is_valid())
     }
 }
 

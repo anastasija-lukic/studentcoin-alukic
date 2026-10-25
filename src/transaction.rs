@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::hash::sha256;
 use crate::wallet::{address_from_public_key, verify_signature, Wallet};
 
+pub const COINBASE_SENDER: &str = "COINBASE";
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Transaction {
     pub sender: String,
@@ -25,6 +27,21 @@ impl Transaction {
         };
         transaction.signature = wallet.sign(&transaction.hash());
         transaction
+    }
+
+    pub fn coinbase(miner: &str, reward: u64, block_index: u64) -> Self {
+        Transaction {
+            sender: COINBASE_SENDER.to_string(),
+            receiver: miner.to_string(),
+            amount: reward,
+            nonce: block_index,
+            public_key: String::new(),
+            signature: String::new(),
+        }
+    }
+
+    pub fn is_coinbase(&self) -> bool {
+        self.sender == COINBASE_SENDER
     }
 
     pub fn hash(&self) -> [u8; 32] {

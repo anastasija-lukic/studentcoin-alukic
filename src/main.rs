@@ -8,14 +8,17 @@ fn main() {
     let mut blockchain = Blockchain::new();
     println!("StudentCoin node");
 
+    let block = blockchain.mine_block(&alice.address());
+    println!("Mined block {} nonce {} hash {}", block.index, block.nonce, block.hash);
+
     let transaction = Transaction::new(&alice, &bob.address(), 10, 0);
     match blockchain.add_transaction(transaction) {
         Ok(()) => println!("Transaction added to mempool"),
         Err(e) => println!("Transaction rejected: {}", e),
     }
 
-    let block = blockchain.create_block();
-    println!("Created block {} with hash {}", block.index, block.hash);
+    let block = blockchain.mine_block(&bob.address());
+    println!("Mined block {} nonce {} hash {}", block.index, block.nonce, block.hash);
     println!("Chain length: {}", blockchain.chain.len());
     println!("Chain valid: {}", blockchain.is_valid());
 }
